@@ -415,26 +415,109 @@ git branch --merged | grep -v "\*" | xargs -n 1 git branch -d
 # Voir l'état de vos fichiers
 git status
 
+# Ajouter des fichiers à l'index
+git add filename
+git add .        # Ajouter tous les fichiers modifiés
+
+# Committer avec un message
+git commit -m "Le message de commit"
+
 # Annuler les modifications d'un fichier
 git checkout -- filename
+
+# Annuler un fichier déjà ajouté (mais pas encore commité)
+git reset filename
+
+# Annuler complètement le dernier commit (mais garder les fichiers modifiés)
+git reset --soft HEAD~1
+
+# Supprimer complètement le dernier commit (⚠️ dangereux si déjà pushé)
+git reset --hard HEAD~1
 
 # Voir qui a modifié chaque ligne d'un fichier
 git blame filename
 
-# Rechercher dans l'historique
+# Rechercher dans l'historique des commits contenant un mot/terme précis
 git log -S "terme-recherché"
 
-# Sauvegarder temporairement des modifications
+# Historique sous forme compacte et graphique
+git log --oneline --graph --all
+
+# Sauvegarder temporairement des modifications non commitées
 git stash save "description des modifications"
-git stash list
-git stash pop
+git stash list (pour voir la liste des stashes)
+git stash pop  (récupération du stash et suppression définitive dans la liste des stashes)
+git stash apply  (récupération du stash mais garde une copie dans la liste des stashes)
+git stash drop stash@{0}               # Supprimer un stash spécifique
+git stash clear                        # Supprimer tous les stashes
 
-# Voir les branches distantes
+# Voir les branches locales et distantes
+git branch                             # Branches locales
+git branch -r                          # Branches distantes
+git branch -a                          # Toutes les branches
+
+# Créer une nouvelle branche et se positionner dessus
+git checkout -b nouvelle-branche
+
+# Supprimer une branche locale
+git branch -d nom-branche
+
+# Suivre une branche distante (tracking)
+git checkout -b nomBranche origin/dev
+
+# Revenir à un commit
+git checkout SHA1 (SHA... est le numéro du commit => e4f2b7d)
+
+# Mettre à jour la branche locale avec la dernière version de la branche distante
+git pull origin nom-branche
+
+# Pousser une branche locale sur le dépôt distant
+git push origin nom-branche
+
+# Voir les remotes configurés
 git remote -v
-git branch -r
 
-# Nettoyer les branches locales supprimées en remote
+# Nettoyer les branches locales supprimées côté distant
 git remote prune origin
+
+# Fusionner une autre branche dans la branche actuelle
+git merge autre-branche
+
+# Rebaser la branche actuelle sur une autre (réécriture d'historique)
+git rebase autre-branche
+
+# Résoudre un conflit de fusion
+# => Modifier les fichiers à la main, puis :
+git add fichier_conflit
+git commit   # ou `git rebase --continue` si en rebase
+
+# Supprimer tous les fichiers non suivis (⚠️ dangereux)
+git clean -fd
+
+# Afficher les différences entre deux branches
+git diff branche1..branche2
+
+# Comparer deux commits
+git diff SHA1 SHA2  (SHA... est le numéro du commit)
+
+# Voir un commit spécifique : auteur, modifications, date...
+git show SHA1 (SHA... est le numéro du commit => e4f2b7d)
+
+# Réinitialiser à un commit : tout les commits suvegardés après celui seront supprimés
+git reset --hard SHA1 (SHA... est le numéro du commit => e4f2b7d)
+
+# Supprimer localement les commits, de l'historique, faits après le SHA donné mais les commits restent en attente dans le staging donc les modif existent toujours (⚠️ à éviter si le commit est déjà poussé sinon cela risque d'affecter l'historique des autres développeurs)
+git reset --soft SHA1
+git reset --soft HEAD~2   # supprimer les 2 derniers commits sans perdre le code
+
+# Créer un nouveau commit qui annule les effets du commit ciblé. Il ne supprime rien, ne modifie pas l’historique et il est utilisé pour annuler proprement un commit déjà poussé. Idéal pour le travail en équipe.
+git revert SHA
+
+# Le git rebase permet de remettre mes commits au-dessus d'une branche afin de mettre à jour la branche et rendre l'historique plus propre (en évitant les merge compliqués).
+git rebase nomBranche  # git va rajouter mes commits au sommet de la branche demandé, ainsi j'aurais une branche à jour avec tous les commits
+git rebase -i ou --interactive # ⚠️ avec les dépôts partagés. Il faut toujours commiter ou stasher avant de rebaser
+git rebase --interactive HEAD~3  # pour modifier les 3 derniers commits  (changer le message, fusionner des commits, etc.). GIT ouvre une liste contenant les commit et leurs messages, ainsi que des indications tels que 'pick' pour choisir, 'reword' pour changer le message du commit, 'squash' pour fusionner des commits, 'drop' pour supprimer un commit et 'edit' pour modifier le contenu du commit
+git rebase -i depotDistant/nomBranche # récupère tous mes commits locaux non pushés
 ```
 
 ## Processus de Pull Request
